@@ -29,16 +29,23 @@ class LineFollowing(object):
         # IR readings
         self.left_reading = 0
         self.right_reading = 0
+        # Motor speeds
+        self.left_motor_speed = 0 # 255 is forward
+        self.right_motor_speed = 1
+        # parameters
         self.sensor_threshold = 1000 #between sensor high (tape) and low (floor)
 
+    # checks if left sensor reads tape
     def check_left_tape(self):
         # above threshold means tape, below means floor
         return left_reading > self.sensor_threshold
 
+    # checks if right sensor reads tape
     def check_right_tape(self):
         # above threshold means tape, below means floor
         return right_reading > self.sensor_threshold
 
+    # based on whether tape detected, will reset motor speeds
     def check_action_required(self):
         # cases:
         if not check_left_tape() and check_right_tape():
@@ -54,9 +61,16 @@ class LineFollowing(object):
             print("Stop! I'm confused :(")
             # stop! you're confused
 
+    # hypothetically sends motor speeds to arduino over serial
     def send_action(self):
-        self.serial_port.write(b'5') # prefix b is required for Python 3.x, optional for Python 2.x
+        command_string = '{}{}{}'.format(chr(255),chr(self.left_motor_speed),chr(self.right_motor_speed)
+        print(command_string)
+        self.serial_port.write(bytes(command_string, 'utf-8'))
+        #self.serial_port.write(struct.pack('>BB',self.left_motor_speed,self.right_motor_speed))
+        #self.serial_port.write(bytes(str(self.left_motor_speed), 'utf-8'))
+        #self.serial_port.write(bytes(str(self.right_motor_speed), 'utf-8'))
 
+    # hypothetically receives sesnor data from arduino over serial
     def get_data(self):
         # ask for a line of data from the serial port, the ".decode()" converts the
         # data from an "array of bytes", to a string
@@ -71,6 +85,7 @@ class LineFollowing(object):
 
 
     def run(self):
+        # currently troubleshooting serial communications
         while True:
             # get IR data
             self.get_data()

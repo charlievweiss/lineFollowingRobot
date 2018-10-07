@@ -1,7 +1,4 @@
 /*
- * test with blink
- */
-/*
 TODO:
 - communicate with python to update motor behavior (2 dc motors independent)
 - send IR data to python
@@ -20,12 +17,6 @@ TODO:
      your controller from your laptop (via the serial connection) without recompiling or reloading your Arduino code. 
 */
 
-/*
- * I think this will just read the action without polluting the
- * data sending to python if I don't print back to the serial line.
- * are there multiple serial lines? one from python and one to it? is that how this works?
- */
-
 
 // analog sensor pins:
 int IR_pin1 = 0;
@@ -38,37 +29,36 @@ int IR_left = 0;
 int IR_right = 0;
 
 // stores received actions
-char reading;
-bool flash = false;
+byte command1;
+byte command2;
+int left_motor_speed;
+int right_motor_speed;
 
 int long baudRate = 9600;
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(baudRate);
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(LED_BUILTIN, OUTPUT); // for blink test
 }
 
 void loop() {
-  read_sensors();
+  //read_sensors();
   delay(10);
-  if (read_action()){
-    test_blink();
-  }
+  read_action();
   delay(10); //necessary to keep data clean
   //test_blink();
 }
 
-bool read_action(){
-  if (Serial.available() > 0) {
-    reading = Serial.read();
+void read_action(){
+  if (Serial.available() <= 0) {
+    return;
   }
-  if (reading>0){
-    return true;
+  if (Serial.read() != 255){
+    return;
   }
-  else{
-    return false;
-  }
+  left_motor_speed = Serial.read();
+  right_motor_speed = Serial.read();
 }
 
 void read_sensors(){
