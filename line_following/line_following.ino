@@ -1,4 +1,6 @@
-
+/*
+ * test with blink
+ */
 /*
 TODO:
 - communicate with python to update motor behavior (2 dc motors independent)
@@ -37,25 +39,35 @@ int IR_right = 0;
 
 // stores received actions
 char reading;
+bool flash = false;
 
 int long baudRate = 9600;
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(baudRate);
+  pinMode(LED_BUILTIN, OUTPUT);
 }
 
 void loop() {
   read_sensors();
   delay(10);
-  read_action();
+  if (read_action()){
+    test_blink();
+  }
   delay(10); //necessary to keep data clean
+  //test_blink();
 }
 
-void read_action(){
+bool read_action(){
   if (Serial.available() > 0) {
     reading = Serial.read();
-    //Serial.print("reading:"); Serial.println(reading);
+  }
+  if (reading>0){
+    return true;
+  }
+  else{
+    return false;
   }
 }
 
@@ -66,4 +78,11 @@ void read_sensors(){
   // print sensor values to serial
   Serial.print(IR_left); Serial.print(",");
   Serial.println(IR_right);
+}
+
+void test_blink(){
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(500);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(500);
 }
