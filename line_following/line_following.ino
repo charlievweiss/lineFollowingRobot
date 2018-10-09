@@ -28,18 +28,22 @@ int IR_pin2 = 1;
 int IR_left = 0;
 int IR_right = 0;
 
+// assuming binary readings
+int sensor_threshold = 1000;
+
 // stores received actions
 byte command1;
 byte command2;
-int left_motor_speed;
-int right_motor_speed;
+int left_motor_speed = 10;
+int right_motor_speed = 20;
 
-int long baudRate = 9600;
+int long baudRate = 115200;
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(baudRate);
   pinMode(LED_BUILTIN, OUTPUT); // for blink test
+  Serial.println("0,0");
 }
 
 void loop() {
@@ -50,24 +54,29 @@ void loop() {
   //test_blink();
 }
 
+/*
 void read_action(){
-  if (Serial.available() <= 0) {
+  if (!Serial.available()) {
     return;
   }
-  if (Serial.read() != 255){
+  int command_stop = Serial.read();
+  if (command_stop != 255){
     return;
   }
   left_motor_speed = Serial.read();
   right_motor_speed = Serial.read();
+  Serial.print(left_motor_speed); Serial.print(",");
+  Serial.println(right_motor_speed);
 }
+*/
 
 void read_sensors(){
   // get sensor values:
   IR_left = 1111; //analogRead(IR_pin1);
   IR_right = 2222; //analogRead(IR_pin2);
   // print sensor values to serial
-  Serial.print(IR_left); Serial.print(",");
-  Serial.println(IR_right);
+  /* Serial.print(IR_left); Serial.print(",");
+  Serial.println(IR_right); */
 }
 
 void test_blink(){
@@ -75,4 +84,27 @@ void test_blink(){
   delay(500);
   digitalWrite(LED_BUILTIN, LOW);
   delay(500);
+}
+
+// Two functions for checking tape
+void check_left_tape(){
+  if (IR_left > sensor_threshold){
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
+void check_right_tape(){
+  if (IR_right > sensor_threshold){
+    return true;
+  }
+  else{
+    return false;
+  }
+}
+
+void check_action_required(){
+  
 }

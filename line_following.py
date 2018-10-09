@@ -23,15 +23,15 @@ and what even is PID
 
 class LineFollowing(object):
     def __init__(self):
-        self.arduino_com_port = "/dev/ttyACM0"
+        self.arduino_com_port = "/dev/ttyACM1"
         self.baud_rate = 9600
         self.serial_port = serial.Serial(self.arduino_com_port, self.baud_rate, timeout=1)
         # IR readings
         self.left_reading = 0
         self.right_reading = 0
         # Motor speeds
-        self.left_motor_speed = 0 # 255 is forward
-        self.right_motor_speed = 1
+        self.left_motor_speed = 50 # 255 is forward
+        self.right_motor_speed = 25
         # parameters
         self.sensor_threshold = 1000 #between sensor high (tape) and low (floor)
 
@@ -63,8 +63,8 @@ class LineFollowing(object):
 
     # hypothetically sends motor speeds to arduino over serial
     def send_action(self):
-        command_string = '{}{}{}'.format(chr(255),chr(self.left_motor_speed),chr(self.right_motor_speed)
-        print(command_string)
+        command_string = '{}{}{}'.format(chr(255),chr(self.left_motor_speed),chr(self.right_motor_speed))
+        print(bytes(command_string), 'utf-8'))
         self.serial_port.write(bytes(command_string, 'utf-8'))
         #self.serial_port.write(struct.pack('>BB',self.left_motor_speed,self.right_motor_speed))
         #self.serial_port.write(bytes(str(self.left_motor_speed), 'utf-8'))
@@ -75,6 +75,7 @@ class LineFollowing(object):
         # ask for a line of data from the serial port, the ".decode()" converts the
         # data from an "array of bytes", to a string
         sensor_data = self.serial_port.readline().decode()
+        print(sensor_data)
         # check if data was received
         if len(sensor_data.split(",")) > 1:
             sensor_data = sensor_data.split(",")
