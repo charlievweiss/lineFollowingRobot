@@ -45,14 +45,13 @@ int sensor_threshold_right = 860;
 
 // stores motor speeds
 int max_speed = 20;
-int turning_speed = 50;
-int pivot_speed = turning_speed/4;
+int turning_speed = 100;
 int left_motor_speed = 10;
 int right_motor_speed = 10;
 
 // last seen tape direction
 // -1 left, 0 not seen, 1 right
-int tape_direction = 0;
+byte tape_direction = 0;
 
 // stores command from serial
 String command_string = "";
@@ -113,8 +112,6 @@ void loop() {
     if (estop == false){
       read_sensors();
       check_action_required();
-      check_left_tape();
-      check_right_tape();
       write_motor_speeds();
     }
   }
@@ -130,8 +127,7 @@ void read_sensors(){
   IR_right = analogRead(IR_pin2);
   // print sensor values to serial
   Serial.print(IR_left); Serial.print(",");
-  Serial.print(IR_right); Serial.print(",");
-  Serial.print(tape_direction); Serial.print(",");
+  Serial.println(IR_right);
 }
 
 void write_motor_speeds(){
@@ -143,21 +139,23 @@ void write_motor_speeds(){
 
 void check_action_required(){
   // if neither sensor detects, keep forward
-  if (tape_direction == 0){
+  if (!check_left_tape() && !check_right_tape()){
     left_motor_speed = max_speed;
     right_motor_speed = max_speed;
     message = "chuggin along";
   }
   // only left, turn left
-  else if (tape_direction == -1){
-    left_motor_speed = pivot_speed;
+  else if (check_left_tape() && !check_right_tape()){
+    left_motor_speed = 0;
     right_motor_speed = turning_speed;
+    tape_direction = -1;
     message = "turning left";
   }
   // only right, turn right
-  else if (tape_direction == 1){
+  else if (!check_left_tape() && check_right_tape()){
     left_motor_speed = turning_speed;
-    right_motor_speed = pivot_speed;
+    right_motor_speed = 0;
+    tape_direction = 1;
     message = "turning right";
   }
   // else, stop
@@ -167,18 +165,24 @@ void check_action_required(){
     tape_direction = 0;
     message = "Stop! Im confused :(";
   }
-  Serial.println(message);
+  //Serial.println(message);
 }
 
 // Two functions for checking tape
 // above threshold means tape, below means floor
-void check_left_tape(){
+bool check_left_tape(){
   if (IR_left > sensor_threshold_left){
-    tape_direction = -1;
+    return true;
+  }
+  else{
+    return false;
   }
 }
-void check_right_tape(){
+bool check_right_tape(){
   if (IR_right > sensor_threshold_right){
-    tape_direction = 1;
+    return true;
+  }
+  else{
+    return false;
   }
 }

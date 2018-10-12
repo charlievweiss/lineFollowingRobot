@@ -64,7 +64,7 @@ class LineFollowing(object):
     # hypothetically sends motor speeds to arduino over serial
     def send_action(self):
         command_string = '{}{}{}'.format(chr(255),chr(self.left_motor_speed),chr(self.right_motor_speed))
-        print(bytes(command_string), 'utf-8'))
+        print(bytes(command_string), 'utf-8')
         self.serial_port.write(bytes(command_string, 'utf-8'))
         #self.serial_port.write(struct.pack('>BB',self.left_motor_speed,self.right_motor_speed))
         #self.serial_port.write(bytes(str(self.left_motor_speed), 'utf-8'))
